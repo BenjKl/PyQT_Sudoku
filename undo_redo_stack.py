@@ -1,134 +1,57 @@
 from collections import deque
 
 
-class UndoRedo:
+class Undo_Redo:
+    #Undo/Redo stack using a deque "list" for efficient append and pop operations
+    
     def __init__(self):
-        self._stack = deque()
-        self._index = -1
+        #Create empty deck and init index
+        self.stack = deque()
+        self.index = -1
 
-    def append(self, num):
-        self.pop()
-        self._stack.append(num)
-        self._index += 1
+    def append(self, obj):
+        #Append an obj to the Undo/Redo stack
+        #If undo has been done before, remove these objects
+        self.pop() #Remove objects from current index to end
+        #Append new obj to the stack and inc index
+        self.stack.append(obj)
+        self.index += 1
 
     def pop(self):
-        l = len(self._stack)
-        for i in reversed(range(self._index + 1, l)):
-            self._stack.pop()
+        #Remove all objects from current index+1 to end from stack
+        for i in range(self.index + 1, len(self.stack)):
+            self.stack.pop()
 
     def undo(self):
-        if self._index > 0:
-            self._index -= 1
-
-    def undoText(self):
-        i = self._index
-        if i > 0:
-            return self._stack[i - 1]
-        else:
-            return self._stack[0]
+        #UNDO operation 
+        #Just left shift the index if possible
+        if self.index > 0:
+            self.index -= 1
 
     def redo(self):
-        indx = len(self._stack)
-        if self._index < (indx - 1):
-            self._index += 1
+        #REDO operation
+        #Just right shift the index if possible
+        if self.index < (len(self.stack) - 1):
+            self.index += 1
 
-    def redoText(self):
-        indx = len(self._stack)
-        i = self._index
-        if i < (indx - 1):
-            return self._stack[i + 1]
-        else:
-            return self._stack[indx - 1]
 
-    def undoAvailable(self):
-        if self._index > 0:
+    def undo_available(self):
+        #Return True if UNDO available
+        if self.index > 0:
             return True
         else:
             return False
 
-    def redoAvailable(self):
-        l = len(self._stack)
-        if self._index < l - 1:
+    def redo_available(self):
+        #Return True if REDO available
+        if self.index < len(self.stack) - 1:
             return True
         else:
             return False
-
-    def out(self):
-        return self._stack
         
-    def current(self):
-        return self._stack[self._index]
+    def current_obj(self):
+        #Returns the current obj from the UNDO/REDO stack
+        #If no undo operations have been performed, 
+        #this is always the right end of the deque
+        return self.stack[self.index]
         
-if __name__ == "__main__":
-    stack = UndoRedo()        
-    
-    stack.append(1)
-    stack.append(2)
-    stack.append(3)    
-    
-    print("stack is:")
-    print(stack.out())
-    print(stack.current())
-
-    print()    
-
-    stack.undo()
-    print("after undo:")
-    print(stack.out())
-    print(stack.current())    
-
-    
-    print()        
-    
-    stack.undo()
-    print("after undo:")
-    print(stack.out())
-    print(stack.current())    
-    
-    print()        
-    
-    if stack.redoAvailable():
-        stack.redo()
-        print("after redo:")
-        print(stack.out())
-        print(stack.current())    
-    else:
-        print("redo not possible")
-
-        
-    
-    print()
-    
-    stack.append(4)
-    print("after append")
-    print(stack.out())
-    print(stack.current())        
-    
-    print()        
-    
-    if stack.undoAvailable():
-        stack.undo()
-        print("after undo:")
-        print(stack.out())
-        print(stack.current())    
-    else:
-        print("Undo not possible")
-    
-    if stack.undoAvailable():
-        stack.undo()
-        print("after undo:")
-        print(stack.out())
-        print(stack.current())    
-    else:
-        print("Undo not possible")
-
-    if stack.undoAvailable():
-        stack.undo()
-        print("after undo:")
-        print(stack.out())
-        print(stack.current())    
-    else:
-        print("Undo not possible")
-
-        
- 
