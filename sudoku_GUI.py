@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QFileDialog,QDialog, QStatusBar
 
 from PyQt5.QtCore import Qt
 from sudoku import Sudoku
-from undo_redo_stack import UndoRedo
+from undo_redo_stack import Undo_Redo
 
 class Tile(QtWidgets.QWidget):
 
@@ -55,7 +55,6 @@ class Tile(QtWidgets.QWidget):
         self.update()
 
     def set_an(self, an):
-        #print("Tile {0}/{1} set an {2}".format(self.x, self.y, str(self.a_numbers)))  
         self.a_numbers = an
         self.update()
 
@@ -436,8 +435,10 @@ class MainWindow(QtWidgets.QMainWindow):
         #Reset the number of recursive calls      
         self.tries = 1
         #Update the sudoku to set all unambiguous candidates
-        self.sudoku.us()        
-        if self.recursive_solver():
+        self.sudoku.us()
+        self.solver_abort = False        
+        self.recursive_solver()
+        if not self.solver_abort:
             self.status_bar.showMessage("Solver finished after {0} tries".format(self.tries))
         self.next_button.setText("Next solution {0}".format(len(self.solutions)))
         self.next_button.setEnabled(True)            
@@ -453,12 +454,14 @@ class MainWindow(QtWidgets.QMainWindow):
         
         #Abort if max_tries have been exceeded
         if self.tries > self.MAX_TRIES:
-            self.status_bar.showMessage("Solver abort after  {0}".format(self.tries))
+            self.status_bar.showMessage("Solver abort after {0} tries".format(self.tries))
+            self.solver_abort = True
             return False    
 
         #Abort if max_tries have been exceeded
         if len(self.solutions) > self.MAX_SOLUTIONS:
             self.status_bar.showMessage("Too many solutions")
+            self.solver_abort = True            
             return False                
              
 
@@ -482,13 +485,14 @@ class MainWindow(QtWidgets.QMainWindow):
                         #Backtracking: Load the backup
                         self.sudoku = backup
                     #print("Solver returning after trying all for r{0}/c{1}".format(r, c))
-                    return #Return after all numbers have been tried
+                    return True#Return after all numbers have been tried
         
         #At this point all possible numbers have been tried for all cell, so the sudoku should be solved
         #print("------------Solver finishing--------------- with {0} tries".format(self.tries))
         #print(self.sudoku)
         #Save the current solution as copy!!!
         self.solutions.append(self.sudoku.copy())
+        return True
                                     
                                 
                         
@@ -498,8 +502,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.current_solution < len(self.solutions)-1:
                 self.current_solution += 1
             else:
-                self.current_solution = 0
-            #print("Current solution {0} from {1}".format(self.current_solution+1, len(self.solutions)))                
+                self.current_solution = 0            
             #Link to the next solutions from the saved solutions
             self.sudoku = self.solutions[self.current_solution]  
             
@@ -565,20 +568,16 @@ class MainWindow(QtWidgets.QMainWindow):
         
     def undo_action(self):
         #Rewind sudoku object from history
-        if self.undo_stack.undoAvailable():
-            #deck = self.undo_stack.out()
-            #for s in deck:
-            #    print(s.to_json())
+        if self.undo_stack.undo_available():
             self.undo_stack.undo() 
-            self.sudoku = self.undo_stack.current().copy()
+            self.sudoku = self.undo_stack.current_obj().copy()
             self.update_display()  
         
     def redo_action(self):
         #Redo sudoku object from history
-        if self.undo_stack.redoAvailable():        
-            print(self.undo_stack.out())        
+        if self.undo_stack.redo_available():               
             self.undo_stack.redo()
-            self.sudoku = self.undo_stack.current().copy()
+            self.sudoku = self.undo_stack.current_obj().copy()
     
             self.update_display()
         
@@ -603,7 +602,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.current_solution = 0             
             
             #Prepare the Undo/Redo Stack
-            self.undo_stack = UndoRedo()
+            self.undo_stack = Undo_Redo()
             #Push to undo stack
             self.undo_stack.append(self.sudoku.copy())   
             
@@ -620,7 +619,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sudoku = Sudoku()
         
         #Prepare the Undo/Redo Stack
-        self.undo_stack = UndoRedo()
+        self.undo_stack = Undo_Redo()
         #Push to undo sta
         self.undo_stack.append(self.sudoku.copy())        
         
@@ -713,6 +712,3 @@ class MainWindow(QtWidgets.QMainWindow):
 app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
 app.exec_()
-
-
-        
