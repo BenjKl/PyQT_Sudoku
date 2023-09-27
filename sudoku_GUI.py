@@ -1,10 +1,12 @@
 import os, sys, json
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QFileDialog,QDialog, QStatusBar
+from PyQt6.QtGui import QPalette
 
 from PyQt6.QtCore import Qt
 from sudoku import Sudoku
 from undo_redo_stack import Undo_Redo
+import darkdetect
 
 class Tile(QtWidgets.QWidget):
 
@@ -22,6 +24,7 @@ class Tile(QtWidgets.QWidget):
         self.n_fontsize = 14
         self.an_fontsize = 8
         self.wrong_number = False
+        self.palette = QtGui.QGuiApplication.palette()
         
 
     def activate(self):
@@ -86,22 +89,21 @@ class Tile(QtWidgets.QWidget):
         super().paintEvent(e)
         p = QtGui.QPainter(self)
         r = e.rect()
+        f = p.font()
         #Calc font_size and contents margins
         self.set_font_Sizes(e.rect().height())
         wrong = self.wrong_number
         #Draw number if > 0
         if self.number > 0:
             if self.locked:
-                pen = QtGui.QPen(Qt.GlobalColor.black)
+                pen = QtGui.QPen(self.palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText))
             elif wrong:
                 pen = QtGui.QPen(Qt.GlobalColor.red)
             else:
-                pen = QtGui.QPen(Qt.GlobalColor.darkGray)
-            p.setPen(pen)            
-            f = p.font()
-            f.setPointSize(self.n_fontsize)            
-
+                pen = QtGui.QPen(self.palette.color(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText))
             f.setBold(True)
+            p.setPen(pen)            
+            f.setPointSize(self.n_fontsize)            
             p.setFont(f)
             p.drawText(r, Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, str(self.number))            
         else:
@@ -114,9 +116,8 @@ class Tile(QtWidgets.QWidget):
             else:
             #Draw candidate if > 0
                 if self.candidate > 0:
-                    pen = QtGui.QPen(QtGui.QColor("skyblue"))     
+                    pen = QtGui.QPen(self.palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.Highlight))
                     p.setPen(pen)                                      
-                    f = p.font()
                     f.setPointSize(self.n_fontsize)            
         
                     p.setFont(f)
@@ -125,8 +126,7 @@ class Tile(QtWidgets.QWidget):
 
         if self.an_fontsize > 0 and len(self.a_numbers) > 0:
             #Draw allowed number if any and enough space
-            f = p.font()
-            pen = QtGui.QPen(Qt.GlobalColor.black)
+            pen = QtGui.QPen(self.palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText))
             p.setPen(pen)            
             f.setPointSize(self.an_fontsize)
             p.setFont(f)
@@ -155,6 +155,7 @@ class Grid(QtWidgets.QFrame):
         #Create the visible border around the frame
         self.setFrameStyle(self.Shape.Box|self.Shape.Panel)
         self.setLineWidth(2)
+        self.palette = QtGui.QGuiApplication.palette()
 
 
     def sizeHint(self):
@@ -175,7 +176,7 @@ class Grid(QtWidgets.QFrame):
         super().paintEvent(e)
         painter = QtGui.QPainter(self)
         pen = QtGui.QPen()
-        pen.setColor(QtGui.QColor("black"))
+        pen.setColor(self.palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText))
 
         height = painter.device().height() - 4
         width = painter.device().width() - 4
