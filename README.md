@@ -12,6 +12,7 @@ Features:
 * Undo/Redo stack (`Cmd+Z`, `Shift-Cmd+Z` on Mac)
 * Generation shows number of *steps* during manual entry or iterations for the solver
 * *Lock* fixes the entered numbers, so they are not deleted during reset
+* *Step* Fill currently shown unambiguous candidates (if any).
 * *Iterate* recursively fills all unambiguous candidates (if any)
 * *Solve* solves the puzzle using a recursive algorithm (also explained here: [Youtube, Python Sudoku Solver - Computerphile](https://www.youtube.com/watch?v=G_UYXzGuqvM))
 * *Reset* deletes all numbers which are not locked.

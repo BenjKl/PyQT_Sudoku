@@ -236,7 +236,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.redo_button.clicked.connect(self.redo_action)                        
         self.redo_button.setShortcut(QtGui.QKeySequence.StandardKey.Redo)           
         self.lock_button = QtWidgets.QPushButton("Lock")
-        self.lock_button.clicked.connect(self.lock_action)        
+        self.lock_button.clicked.connect(self.lock_action)   
+        self.step_button = QtWidgets.QPushButton("Step")
+        self.step_button.clicked.connect(self.step_action)
         self.iterate_button = QtWidgets.QPushButton("Iterate")
         self.iterate_button.clicked.connect(self.iterate_action)
         self.solve_button = QtWidgets.QPushButton("Solve")
@@ -262,6 +264,7 @@ class MainWindow(QtWidgets.QMainWindow):
         button_layout.addWidget(self.redo_button)                
         button_layout.addWidget(label_group)
         button_layout.addWidget(self.lock_button)        
+        button_layout.addWidget(self.step_button)
         button_layout.addWidget(self.iterate_button)
         button_layout.addWidget(self.solve_button)        
         button_layout.addWidget(self.reset_button)
@@ -419,6 +422,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_display()               
             
     def iterate_action(self):
+        #Iterate the sudoku object
+        #print("Starting recursive solve")
+        self.sudoku.us()
+        
+        #Push to undo stack
+        self.undo_stack.append(self.sudoku.copy())
+        
+        self.update_display()
+
+    def step_action(self):
         #Iterate the sudoku object
         #print("Starting recursive solve")
         self.sudoku.us()

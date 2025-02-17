@@ -275,7 +275,7 @@ class Sudoku():
                     return cand[0]
         return 0
 
-    def us(self):
+    def us(self, cont=False):
         #Recursively set all unambigous candidates to the grid
         #print("Iterating")        
         candidates = []
@@ -309,7 +309,10 @@ class Sudoku():
             #Increase the generation
             self.generation += 1               
             #print("Iteration finish")
-            return self.us()                                   
+            if cont:
+                return self.us(cont)
+            else:
+                return True
         
                 
     def on(self, l):
