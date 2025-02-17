@@ -109,8 +109,8 @@ class Tile(QtWidgets.QWidget):
         else:
             if wrong:
             #Draw red background if empty and wrong                
-            
-                p.setPen(Qt.NoPen)                        
+                pen = QtGui.QPen(Qt.GlobalColor.red)
+                p.setPen(pen)                        
                 p.setBrush(QtGui.QBrush(QtGui.QColor("lightcoral")))
                 p.drawRect(1,1, r.width()-2, r.height()-2)
             else:
@@ -427,7 +427,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sudoku.us()
         
         #Push to undo stack
-        self.undo_stack.append(self.sudoku.copy())
+        self.undo_stack.append(self.sudoku.copy(cont=True))
         
         self.update_display()
 
